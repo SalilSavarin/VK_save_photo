@@ -39,13 +39,15 @@ class VK:
   # Собирает два словаря. 
   # Первый Ключ - URL на фото, Значение - количество лайков у фотографии
   # Второй собирает информацию о фото и записывает в файл inf.json
-  def get_photos_url_and_like_in_dict(self,owner_id):
+  def get_photos_url_and_like_in_dict(self,owner_id,limit_photos):
     url_for_func = self.url + 'photos.get'
     owner_id_for_params = self.users_get_id(owner_id)
     url_list_type_z = []
     likes_list = []
     dict_url_and_likes = None
     my_json = []
+    count_for_1 = 0
+    count_for_2 = 0
     params_photoget = {
       'owner_id': owner_id_for_params,
       'album_id': 'profile',
@@ -56,8 +58,14 @@ class VK:
       if dict_1['likes']['count'] in likes_list:
         likes_list.append(str(dict_1['likes']['count']) + ' - ' +
           (DateFromTicks(dict_1['date'])).strftime('%d-%m-%Y'))
+        count_for_1 += 1
+        if count_for_1 == limit_photos:
+          break
       else:
         likes_list.append(dict_1['likes']['count'])
+        count_for_1 += 1
+        if count_for_1 == limit_photos:
+          break
     for dict_2 in response['response']['items']:
       max_size = 0
       dict_format = {
@@ -78,6 +86,9 @@ class VK:
           best_url = size['url']
           max_size = dict_format[size['type']]
       url_list_type_z.append(best_url)
+      count_for_2 +=1
+      if count_for_2 == limit_photos:
+        break
     dict_url_and_likes = dict(zip(url_list_type_z, likes_list))
     for url,like in dict_url_and_likes.items():
       for inf in response['response']['items']:
@@ -254,4 +265,7 @@ def main_func():
         print('Ошибка!')
 
 
-main_func()
+client_vk = VK(token_VK, '5.131')
+client_yd = YandexDisk(token_YD)
+pprint(client_vk.get_photos_url_and_like_in_dict('francevaa1', 2))
+
