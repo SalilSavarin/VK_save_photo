@@ -2,9 +2,10 @@ import json
 from pprint import pprint
 from sqlite3 import DateFromTicks
 import requests
-from VK_TOKEN import VK_TOKEN as token_VK
-from YADISK_TOKEN import TOKEN_YADISK as token_YD
 import datetime
+from tqdm import tqdm
+from time import sleep
+
 
 
 class VK: 
@@ -226,7 +227,8 @@ def main_func():
   while True:
     command = input('''
     q - команда, которая закроет программу
-    d - команда для загрузки аватарок пользователя ВК на ЯндексДиск (Обязательные параметры: TokenVK, id пользователя, TokenYandexDisk)
+    d - команда для загрузки аватарок пользователя ВК на ЯндексДиск 
+        (Обязательные параметры: TokenVK, id пользователя, TokenYandexDisk, количество фото к загрузке(начнется с с ))
         СОЗДАЙТЕ ПАПКУ ДЛЯ СКАЧИВАНИЯ ФАЙЛОВ!!!(Папка должна находиться в корне диска)
     i - команда для получчения информации о пользователе (Обязательные параметры: TokenVK, id пользователя)
     c - команда создает новую папку в корне диска(Обязательные параметры: имя папки, TokenYandexDisk ) 
@@ -239,11 +241,13 @@ def main_func():
         name_folder = input('Введите имя папки: ')
         user_id = input('Введите id пользователя: ')
         tkn_vk = input('Введите TokenVK: ')
-        client_1_VK = VK(tkn_vk, '5.131')
-        url_likes_dict = client_1_VK.get_photos_url_and_like_in_dict(user_id)
+        count_photos = int(input('Введите количество фото к загрузке: '))
         tkn_yd = input('Введите TokenYD: ')
+        client_1_VK = VK(tkn_vk, '5.131')
+        url_likes_dict = client_1_VK.get_photos_url_and_like_in_dict(user_id,count_photos)
         client_1_YD = YandexDisk(tkn_yd)
-        for k, v in url_likes_dict.items():
+        for k, v in tqdm(url_likes_dict.items()):
+          sleep(1)
           client_1_YD.post_on_disk_from_internet(k, f'disk:/{name_folder}/{v}')
       except:
         print('Данные введены некорректно или у пользователя не установлена аватарка')
@@ -265,7 +269,4 @@ def main_func():
         print('Ошибка!')
 
 
-client_vk = VK(token_VK, '5.131')
-client_yd = YandexDisk(token_YD)
-pprint(client_vk.get_photos_url_and_like_in_dict('francevaa1', 2))
-
+main_func()
